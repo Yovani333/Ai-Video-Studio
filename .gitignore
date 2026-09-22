@@ -1,0 +1,56 @@
+# Environment and secrets
+.env
+*.env.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest_tmp/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+
+# JavaScript
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Databases and runtime data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Generated media and temporary processing files
+storage/projects/*
+storage/clips/*
+storage/final/*
+!storage/projects/.gitkeep
+!storage/clips/.gitkeep
+!storage/final/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+
+# AI model files
+/models/
+weights/
+checkpoints/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
