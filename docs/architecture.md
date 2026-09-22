@@ -14,3 +14,5 @@ Project -> ScenePlanner -> VideoEngine adapter -> generated clips -> VideoRender
 `VideoEngine` is provider-neutral. Future adapters such as `WanEngine` or `LTXEngine` can execute against a remote GPU without leaking provider details into routes or project persistence. `VideoRenderer` similarly isolates FFmpeg commands from business logic.
 
 Scene continuity data lives in a structured `SceneContext` containing character, environment, style, lighting, camera, colors, reference images, and seed fields. These fields are intentionally empty during phase 1.
+
+The proposed remote execution architecture and its incremental validation plan are documented in [Phase 2: Remote GPU architecture](phase-2-gpu-architecture.md).

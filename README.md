@@ -15,6 +15,8 @@ The GitHub Pages preview hosts only the static React interface. Project creation
 
 See [docs/architecture.md](docs/architecture.md) for the dependency flow and extension points.
 
+The proposed provider-neutral worker design is documented in [docs/phase-2-gpu-architecture.md](docs/phase-2-gpu-architecture.md). No GPU resources or model weights are provisioned by the current repository.
+
 ## Requirements
 
 - Python 3.11
