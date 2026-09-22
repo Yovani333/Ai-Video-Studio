@@ -22,3 +22,14 @@ class SceneStatus(str, Enum):
     GENERATING = "generating"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class GenerationJobStatus(str, Enum):
+    QUEUED = "queued"
+    SUBMITTING = "submitting"
+    RUNNING = "running"
+    TRANSFERRING = "transferring"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    TIMED_OUT = "timed_out"
+    CANCELLED = "cancelled"

@@ -7,7 +7,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-.pytest_tmp/
+.pytest_tmp*/
 .mypy_cache/
 .ruff_cache/
 venv/
@@ -29,6 +29,7 @@ frontend/dist/
 storage/projects/*
 storage/clips/*
 storage/final/*
+worker/artifacts/
 !storage/projects/.gitkeep
 !storage/clips/.gitkeep
 !storage/final/.gitkeep

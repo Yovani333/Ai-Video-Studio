@@ -1,0 +1,40 @@
+{
+  "protocol_version": "1",
+  "transport": "https",
+  "authentication": "bearer",
+  "job_states": [
+    "queued",
+    "submitting",
+    "running",
+    "transferring",
+    "succeeded",
+    "failed",
+    "timed_out",
+    "cancelled"
+  ],
+  "request_required_fields": [
+    "protocol_version",
+    "job_id",
+    "scene_id",
+    "mode",
+    "engine",
+    "model_revision",
+    "prompt",
+    "duration_seconds",
+    "width",
+    "height",
+    "fps"
+  ],
+  "endpoints": {
+    "health": "GET /v1/health",
+    "readiness": "GET /v1/readiness",
+    "submit": "PUT /v1/jobs/{job_id}",
+    "status": "GET /v1/jobs/{job_id}",
+    "cancel": "POST /v1/jobs/{job_id}/cancel",
+    "artifact": "GET /v1/jobs/{job_id}/artifacts/clip"
+  },
+  "idempotency": {
+    "same_job_id_same_payload": "return_existing_job",
+    "same_job_id_different_payload": "409_conflict"
+  }
+}

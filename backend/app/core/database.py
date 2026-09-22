@@ -16,6 +16,6 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 def create_database_tables() -> None:
     # Import models so SQLAlchemy registers their tables before create_all.
-    from app.models import project, scene  # noqa: F401
+    from app.models import generation_job, project, scene  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

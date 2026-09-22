@@ -1,7 +1,34 @@
 # Phase 2: Remote GPU architecture
 
-Status: proposed for implementation
+Status: Phase 2A implemented and validated; Phase 2B pending
 Decision date: 2026-09-21
+
+## Phase 2A implementation status
+
+Implemented locally:
+
+- persisted `GenerationJob` records and attempt numbering;
+- explicit per-scene generation, job status, and cancellation endpoints;
+- provider-neutral `GPUProvider` contract and authenticated HTTP implementation;
+- version 1 protocol manifest under `contracts/`;
+- independent lightweight worker with an SQLite ledger;
+- client-defined job IDs and payload-hash conflict detection;
+- sequential diagnostic execution;
+- restart recovery for interrupted jobs;
+- bearer-token authentication;
+- checksum-verifiable JSON diagnostic artifacts;
+- backend and worker tests with no CUDA or model dependencies.
+
+Validated end to end over HTTP: FastAPI created a project and scene job, submitted the same UUID to the worker, reconciled the terminal status, retrieved the diagnostic artifact, and matched its SHA-256.
+
+Intentional Phase 2A limitations:
+
+- status reconciliation happens when the job API is queried; there is no background scheduler yet;
+- the backend provider can fetch artifact bytes, but durable streamed download and atomic local placement belong to Phase 2B;
+- diagnostic cancellation is cooperative; supervised termination of GPU inference belongs to Phase 3;
+- the worker supports only the diagnostic engine;
+- database migrations have not yet been introduced;
+- no remote worker, GPU, model weights, or provider account was provisioned.
 
 ## Objective
 

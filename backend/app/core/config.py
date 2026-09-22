@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     gpu_provider: str = ""
     gpu_api_url: str = ""
     gpu_api_key: str = ""
+    gpu_worker_token: str = ""
+    gpu_request_timeout_seconds: float = 10.0
     video_engine: str = "stub"
 
     model_config = SettingsConfigDict(

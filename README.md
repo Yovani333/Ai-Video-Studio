@@ -47,6 +47,26 @@ After setup, the helper can start it from the repository root:
 .\scripts\start-backend.ps1
 ```
 
+## Diagnostic worker (Phase 2A)
+
+The lightweight worker validates remote-job behavior without CUDA, model weights, or video generation. In a third PowerShell window:
+
+```powershell
+cd C:\path\to\Ai-Video-Studio
+$env:WORKER_API_TOKEN = "choose-a-long-local-development-token"
+.\backend\.venv\Scripts\python.exe -m uvicorn worker.app.main:app --reload --host 127.0.0.1 --port 8010
+```
+
+Configure `backend/.env` with the same token:
+
+```dotenv
+GPU_API_URL=http://127.0.0.1:8010
+GPU_WORKER_TOKEN=choose-a-long-local-development-token
+VIDEO_ENGINE=diagnostic
+```
+
+The worker produces a checksum-verifiable JSON diagnostic artifact. It never produces a fake video.
+
 ## Frontend setup (Windows PowerShell)
 
 Open a second PowerShell window at the repository root:
@@ -72,6 +92,9 @@ Open `http://127.0.0.1:5173`. After setup, you can also use:
 - `POST /api/projects` — create and persist a project and its initial scene plan.
 - `GET /api/projects` — list projects, newest first.
 - `GET /api/projects/{project_id}` — retrieve a project and scenes.
+- `POST /api/projects/{project_id}/scenes/{scene_id}/generations` — explicitly create one generation attempt.
+- `GET /api/jobs/{job_id}` — reconcile a job with the configured worker.
+- `POST /api/jobs/{job_id}/cancel` — request cancellation.
 
 Example request:
 
@@ -91,7 +114,10 @@ A 60-second project initially receives twelve five-second scenes in `waiting` st
 cd .\backend
 .\.venv\Scripts\python.exe -m pytest
 
-cd ..\frontend
+cd ..
+.\backend\.venv\Scripts\python.exe -m pytest worker\tests
+
+cd .\frontend
 npm run build
 ```
 
@@ -108,6 +134,7 @@ backend/
     services/        # Project, planning, engine, and renderer boundaries
     main.py
   tests/
+contracts/           # Versioned backend/worker protocol manifest
 frontend/
   src/
     api/             # Typed backend client
@@ -118,17 +145,18 @@ storage/
   projects/
   clips/
   final/
+worker/              # Lightweight worker boundary; no GPU model in Phase 2A
 ```
 
 ## Environment and secrets
 
-Copy each `.env.example` to `.env` locally. Never commit real GPU credentials. The backend example reserves `GPU_PROVIDER`, `GPU_API_URL`, `GPU_API_KEY`, and `VIDEO_ENGINE` for a later phase.
+Copy each `.env.example` to `.env` locally. Never commit real GPU credentials. `GPU_API_URL` and `GPU_WORKER_TOKEN` connect FastAPI to the worker. Provider administrative credentials remain separate and are not used by Phase 2A.
 
 ## Pending phases
 
 - AI-assisted scene prompts and continuity refinement.
 - A real remote-GPU `VideoEngine` adapter (Wan, LTX-Video, or another selected engine).
-- Job queue, progress reporting, cancellation, retry, and authentication.
+- Remote deployment, supervised inference cancellation, retry policy, and progress reporting.
 - FFmpeg renderer for resolution/FPS normalization, concatenation, audio, and final MP4 output.
 - Thumbnails, previews, scene editing, and regeneration.
 - Database migrations and PostgreSQL deployment configuration.
