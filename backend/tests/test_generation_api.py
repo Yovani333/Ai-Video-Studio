@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -17,6 +18,7 @@ def now() -> datetime:
 
 class FakeGPUProvider(GPUProvider):
     name = "fake-provider"
+    artifact_bytes = b'{"diagnostic":true}'
 
     def __init__(self) -> None:
         self.requests: dict[str, WorkerJobRequest] = {}
@@ -53,8 +55,8 @@ class FakeGPUProvider(GPUProvider):
             artifact=ArtifactMetadata(
                 artifact_id=f"diagnostic:{job_id}",
                 media_type="application/json",
-                size_bytes=10,
-                sha256="b" * 64,
+                size_bytes=len(self.artifact_bytes),
+                sha256=hashlib.sha256(self.artifact_bytes).hexdigest(),
                 kind="diagnostic",
                 filename=f"{job_id}.json",
             ),
@@ -81,8 +83,15 @@ class FakeGPUProvider(GPUProvider):
             completed_at=timestamp,
         )
 
-    async def download_artifact(self, job_id: str) -> bytes:
-        return b"{}"
+    async def download_artifact(
+        self,
+        job_id: str,
+        destination: Path,
+        expected: ArtifactMetadata,
+    ) -> Path:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(self.artifact_bytes)
+        return destination
 
 
 @pytest.fixture
@@ -121,7 +130,13 @@ def test_create_and_refresh_generation_job(client, fake_provider):
     refreshed = refreshed_response.json()
     assert refreshed["status"] == "succeeded"
     assert refreshed["artifact"]["kind"] == "diagnostic"
+    assert refreshed["artifact"]["local_path"].endswith(f"{created['id']}.json")
     assert refreshed["effective_parameters"]["video_generated"] is False
+
+    artifact_response = client.get(f"/api/jobs/{created['id']}/artifact")
+    assert artifact_response.status_code == 200
+    assert artifact_response.headers["content-type"] == "application/json"
+    assert artifact_response.content == fake_provider.artifact_bytes
 
 
 def test_cancel_generation_job(client, fake_provider):
@@ -149,6 +164,7 @@ def test_generation_rejects_scene_from_another_project(client, fake_provider):
 def test_missing_generation_job(client, fake_provider):
     assert client.get("/api/jobs/missing").status_code == 404
     assert client.post("/api/jobs/missing/cancel").status_code == 404
+    assert client.get("/api/jobs/missing/artifact").status_code == 404
 
 
 def test_uncertain_submission_is_persisted_for_reconciliation(client):

@@ -26,6 +26,11 @@ class WorkerRuntime:
                 await self.consumer_task
             except asyncio.CancelledError:
                 pass
+        self.consumer_task = None
+
+    @property
+    def is_running(self) -> bool:
+        return self.consumer_task is not None and not self.consumer_task.done()
 
     async def enqueue(self, job_id: str) -> None:
         await self.queue.put(job_id)

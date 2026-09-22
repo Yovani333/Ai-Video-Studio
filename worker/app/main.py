@@ -32,6 +32,8 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        if not token:
+            raise RuntimeError("WORKER_API_TOKEN must be configured before startup")
         await runtime.start()
         yield
         await runtime.stop()
@@ -54,7 +56,7 @@ def create_app(
 
     @application.get("/v1/readiness", response_model=WorkerReadiness, dependencies=[Depends(authorize)])
     def readiness() -> WorkerReadiness:
-        return WorkerReadiness(accepts_jobs=True)
+        return WorkerReadiness(accepts_jobs=runtime.is_running)
 
     @application.put(
         "/v1/jobs/{job_id}",
@@ -115,7 +117,10 @@ def create_app(
             raise HTTPException(status_code=404, detail="Job not found")
         if job.status != "succeeded" or job.artifact is None:
             raise HTTPException(status_code=409, detail="Artifact is not available")
-        path = diagnostic_engine.artifact_root / job.artifact.filename
+        artifact_root_path = diagnostic_engine.artifact_root.resolve()
+        path = (artifact_root_path / job.artifact.filename).resolve()
+        if not path.is_relative_to(artifact_root_path):
+            raise HTTPException(status_code=410, detail="Artifact path is invalid")
         if not path.is_file():
             raise HTTPException(status_code=410, detail="Artifact is no longer available")
         return FileResponse(path, media_type=job.artifact.media_type, filename=path.name)

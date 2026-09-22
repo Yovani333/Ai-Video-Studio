@@ -29,6 +29,7 @@ frontend/dist/
 storage/projects/*
 storage/clips/*
 storage/final/*
+storage/worker/
 worker/artifacts/
 !storage/projects/.gitkeep
 !storage/clips/.gitkeep

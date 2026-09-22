@@ -15,7 +15,7 @@ The GitHub Pages preview hosts only the static React interface. Project creation
 
 See [docs/architecture.md](docs/architecture.md) for the dependency flow and extension points.
 
-The proposed provider-neutral worker design is documented in [docs/phase-2-gpu-architecture.md](docs/phase-2-gpu-architecture.md). No GPU resources or model weights are provisioned by the current repository.
+The provider-neutral worker design is documented in [docs/phase-2-gpu-architecture.md](docs/phase-2-gpu-architecture.md). The hardened diagnostic-container procedure is in [docs/worker-deployment.md](docs/worker-deployment.md). No GPU resources or model weights are provisioned by the current repository.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ After setup, the helper can start it from the repository root:
 .\scripts\start-backend.ps1
 ```
 
-## Diagnostic worker (Phase 2A)
+## Diagnostic worker (Phase 2A/2B)
 
 The lightweight worker validates remote-job behavior without CUDA, model weights, or video generation. In a third PowerShell window:
 
@@ -66,6 +66,7 @@ VIDEO_ENGINE=diagnostic
 ```
 
 The worker produces a checksum-verifiable JSON diagnostic artifact. It never produces a fake video.
+FastAPI streams the artifact into `storage/clips`, validates its declared length and SHA-256, then publishes it atomically. `GPU_MAX_ARTIFACT_BYTES` limits accepted artifact size.
 
 ## Frontend setup (Windows PowerShell)
 
@@ -95,6 +96,7 @@ Open `http://127.0.0.1:5173`. After setup, you can also use:
 - `POST /api/projects/{project_id}/scenes/{scene_id}/generations` — explicitly create one generation attempt.
 - `GET /api/jobs/{job_id}` — reconcile a job with the configured worker.
 - `POST /api/jobs/{job_id}/cancel` — request cancellation.
+- `GET /api/jobs/{job_id}/artifact` — download a locally verified artifact.
 
 Example request:
 
@@ -145,7 +147,7 @@ storage/
   projects/
   clips/
   final/
-worker/              # Lightweight worker boundary; no GPU model in Phase 2A
+worker/              # Lightweight remote-ready worker; no GPU model in Phase 2B
 ```
 
 ## Environment and secrets
@@ -155,8 +157,9 @@ Copy each `.env.example` to `.env` locally. Never commit real GPU credentials. `
 ## Pending phases
 
 - AI-assisted scene prompts and continuity refinement.
+- Remote validation of the diagnostic worker using a user-controlled endpoint and secret.
 - A real remote-GPU `VideoEngine` adapter (Wan, LTX-Video, or another selected engine).
-- Remote deployment, supervised inference cancellation, retry policy, and progress reporting.
+- Supervised inference cancellation, retry policy, and progress reporting.
 - FFmpeg renderer for resolution/FPS normalization, concatenation, audio, and final MP4 output.
 - Thumbnails, previews, scene editing, and regeneration.
 - Database migrations and PostgreSQL deployment configuration.

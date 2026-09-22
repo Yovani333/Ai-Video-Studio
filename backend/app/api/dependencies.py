@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -23,4 +24,9 @@ def get_gpu_provider() -> GPUProvider:
         base_url=settings.gpu_api_url,
         token=settings.gpu_worker_token,
         timeout_seconds=settings.gpu_request_timeout_seconds,
+        max_artifact_bytes=settings.gpu_max_artifact_bytes,
     )
+
+
+def get_storage_root() -> Path:
+    return get_settings().storage_root

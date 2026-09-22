@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.api.dependencies import get_db
+from app.api.dependencies import get_db, get_storage_root
 from app.core.database import Base
 from app.main import app
 
@@ -25,6 +25,7 @@ def client(tmp_path):
             session.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_storage_root] = lambda: tmp_path / "storage"
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

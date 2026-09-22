@@ -4,6 +4,9 @@ services:
     environment:
       DATABASE_URL: sqlite:////data/ai_video_studio.db
       CORS_ORIGINS: http://localhost:5173
+      GPU_API_URL: ${GPU_API_URL:-}
+      GPU_WORKER_TOKEN: ${GPU_WORKER_TOKEN:-}
+      GPU_MAX_ARTIFACT_BYTES: ${GPU_MAX_ARTIFACT_BYTES:-2147483648}
     ports:
       - "8000:8000"
     volumes:
@@ -18,3 +21,18 @@ services:
       - backend
     ports:
       - "5173:80"
+
+  worker:
+    profiles: ["worker"]
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    environment:
+      WORKER_API_TOKEN: ${WORKER_API_TOKEN:-}
+      WORKER_DATABASE_PATH: /data/worker.db
+      WORKER_ARTIFACT_ROOT: /data/artifacts
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./storage/worker:/data
+    restart: unless-stopped

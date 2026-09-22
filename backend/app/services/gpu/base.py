@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
-from app.schemas.generation import WorkerJobRead, WorkerJobRequest
+from app.schemas.generation import ArtifactMetadata, WorkerJobRead, WorkerJobRequest
 
 
 class GPUProviderError(RuntimeError):
@@ -31,5 +32,10 @@ class GPUProvider(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def download_artifact(self, job_id: str) -> bytes:
+    async def download_artifact(
+        self,
+        job_id: str,
+        destination: Path,
+        expected: ArtifactMetadata,
+    ) -> Path:
         raise NotImplementedError

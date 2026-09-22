@@ -1,6 +1,6 @@
 # Phase 2: Remote GPU architecture
 
-Status: Phase 2A implemented and validated; Phase 2B pending
+Status: Phase 2A validated; Phase 2B implementation complete locally, remote validation pending
 Decision date: 2026-09-21
 
 ## Phase 2A implementation status
@@ -29,6 +29,22 @@ Intentional Phase 2A limitations:
 - the worker supports only the diagnostic engine;
 - database migrations have not yet been introduced;
 - no remote worker, GPU, model weights, or provider account was provisioned.
+
+## Phase 2B implementation status
+
+Implemented and validated locally:
+
+- streamed artifact downloads through `.part` files;
+- configured maximum artifact size, declared-length validation, and SHA-256 validation;
+- atomic publication under `storage/clips/<project>/<scene>/`;
+- local artifact retrieval through `GET /api/jobs/{job_id}/artifact`;
+- stable backend error categories for authentication, conflicts, throttling, service failures, malformed responses, and artifact validation;
+- a non-root worker image with persistent `/data`, health check, and mandatory startup token;
+- path containment checks in both backend and worker;
+- Docker Compose worker profile and an operational deployment guide.
+
+Remote diagnostic validation remains pending because no remote endpoint or worker
+credential is stored in this repository. See [worker-deployment.md](worker-deployment.md).
 
 ## Objective
 

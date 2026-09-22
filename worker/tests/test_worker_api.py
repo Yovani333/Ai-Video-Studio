@@ -3,6 +3,7 @@ import json
 import time
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from worker.app.engine import DiagnosticEngine
@@ -31,6 +32,17 @@ def test_health_and_authentication(worker_client, auth_headers):
         "engine": "diagnostic",
         "accepts_jobs": True,
     }
+
+
+def test_worker_refuses_to_start_without_authentication(tmp_path):
+    app = create_app(
+        database_path=tmp_path / "worker.db",
+        artifact_root=tmp_path / "artifacts",
+        api_token="",
+    )
+    with pytest.raises(RuntimeError, match="WORKER_API_TOKEN"):
+        with TestClient(app):
+            pass
 
 
 def test_idempotency_and_diagnostic_artifact(worker_client, auth_headers, job_payload):
