@@ -42,6 +42,17 @@ Invoke-RestMethod http://127.0.0.1:8010/v1/readiness -Headers $headers
 The expected response reports protocol `1`, engine `diagnostic`, and
 `accepts_jobs: true`.
 
+The repository also includes a complete protocol smoke test. It creates one
+small diagnostic job and validates the downloaded artifact without printing the
+token:
+
+```powershell
+$env:WORKER_API_TOKEN = "your-worker-token"
+.\scripts\test-remote-worker.ps1 -WorkerUrl "https://your-worker-host.example"
+```
+
+For a local worker only, pass `-AllowHttp`.
+
 ## Deploy on a remote container host
 
 The same image can run on a manually managed GPU Pod or another Docker host even
@@ -103,3 +114,7 @@ publish a final artifact.
 - supervised GPU inference cancellation;
 - background polling in FastAPI;
 - public backend hosting or object storage.
+
+GitHub Actions runs the backend and worker test suites, builds the frontend, and
+builds the diagnostic worker image on every push to `main`. It validates the
+container but does not publish an image or create remote infrastructure.

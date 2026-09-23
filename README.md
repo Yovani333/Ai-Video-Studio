@@ -68,6 +68,13 @@ VIDEO_ENGINE=diagnostic
 The worker produces a checksum-verifiable JSON diagnostic artifact. It never produces a fake video.
 FastAPI streams the artifact into `storage/clips`, validates its declared length and SHA-256, then publishes it atomically. `GPU_MAX_ARTIFACT_BYTES` limits accepted artifact size.
 
+After deploying the diagnostic worker, validate its protocol and artifact independently:
+
+```powershell
+$env:WORKER_API_TOKEN = "your-worker-token"
+.\scripts\test-remote-worker.ps1 -WorkerUrl "https://your-worker-host.example"
+```
+
 ## Frontend setup (Windows PowerShell)
 
 Open a second PowerShell window at the repository root:
